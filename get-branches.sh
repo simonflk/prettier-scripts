@@ -1,20 +1,24 @@
 #!/bin/bash
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ -f $script_dir/.env ]; then
+  source $script_dir/.env;
+fi
 
-ISF='' read -r -d '' query <<-END_GQL 
+ISF='' read -r -d '' query <<-END_GQL
 query {
-  repository(owner: "$GITHUB_OWNER", name: "$GITHUB_REPO") { 
-    pullRequests(first:100, states:[OPEN], orderBy:{field: UPDATED_AT, direction:DESC}) { 
-      pageInfo { 
-        hasNextPage 
-        endCursor 
-      } 
-      edges { 
-        node { 
-          headRefName 
-        } 
-      } 
-    } 
-  } 
+  repository(owner: "$GITHUB_OWNER", name: "$GITHUB_REPO") {
+    pullRequests(first:100, states:[OPEN], orderBy:{field: UPDATED_AT, direction:DESC}) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        node {
+          headRefName
+        }
+      }
+    }
+  }
 }
 END_GQL
 
@@ -25,21 +29,21 @@ jq --raw-output '.data.repository.pullRequests.edges | .[] | .node.headRefName' 
 
 while [ $(jq --raw-output '.data.repository.pullRequests.pageInfo.hasNextPage' <<< $branches_json) = "true" ]; do
   cursor=$(jq --raw-output '.data.repository.pullRequests.pageInfo.endCursor' <<< $branches_json)
-  ISF='' read -r -d '' query <<-END_GQL 
+  ISF='' read -r -d '' query <<-END_GQL
   query {
-    repository(owner: "$GITHUB_OWNER", name: "$GITHUB_REPO") { 
-      pullRequests(first:100, states:[OPEN], orderBy:{field: UPDATED_AT, direction:DESC} after:"$cursor") { 
-        pageInfo { 
-          hasNextPage 
-          endCursor 
-        } 
-        edges { 
-          node { 
-            headRefName 
-          } 
-        } 
-      } 
-    } 
+    repository(owner: "$GITHUB_OWNER", name: "$GITHUB_REPO") {
+      pullRequests(first:100, states:[OPEN], orderBy:{field: UPDATED_AT, direction:DESC} after:"$cursor") {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            headRefName
+          }
+        }
+      }
+    }
   }
 END_GQL
 

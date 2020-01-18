@@ -6,21 +6,19 @@ if [ -f $script_dir/.env ]; then
 fi
 current_branch=$(git symbolic-ref --short HEAD)
 
-formatted=()
+reverted=()
 failed=()
-rm $script_dir/fails.log || true
 for branch in $($script_dir/get-branches.sh); do
-  echo -e '\n\n• upgrading `'$branch'`'
+  echo -e '\n\n• reverting `'$branch'`'
   git checkout $branch
-  if $script_dir/upgrade-branch.sh --auto; then
-    formatted+=($branch)
+  if $script_dir/upgrade-branch.sh --revert; then
+    reverted+=($branch)
   else
     failed+=($branch)
-    echo "[$(date)]: $branch" >> $script_dir/fails.log
   fi
 done
 git checkout $current_branch
 
 echo 'Summary of results:'
-for i in ${formatted[@]}; do echo "✨ $i"; done
+for i in ${reverted[@]}; do echo "↩️  $i"; done
 for i in ${failed[@]}; do echo "⚠️  $i"; done
