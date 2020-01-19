@@ -1,7 +1,8 @@
 #!/bin/bash
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-if [ -f $script_dir/.env ]; then
-  source $script_dir/.env;
+project_dir=$(readlink -f $script_dir/..)
+if [ -f $project_dir/.env ]; then
+  source $project_dir/.env;
 fi
 
 ISF='' read -r -d '' query <<-END_GQL

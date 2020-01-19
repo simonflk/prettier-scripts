@@ -1,22 +1,24 @@
 #!/bin/bash
 set -e
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-if [ -f $script_dir/.env ]; then
-  source $script_dir/.env;
+project_dir=$(readlink -f $script_dir/..)
+log_file="${project_dir}/logs/prettify-branches-$(date -I).log"
+if [ -f $project_dir/.env ]; then
+  source $project_dir/.env;
 fi
 current_branch=$(git symbolic-ref --short HEAD)
 
 formatted=()
 failed=()
-rm $script_dir/fails.log || true
 for branch in $($script_dir/get-branches.sh); do
   echo -e '\n\n• upgrading `'$branch'`'
   git checkout $branch
   if $script_dir/upgrade-branch.sh --auto; then
     formatted+=($branch)
+    echo "[$(date)]: PASS $branch" >> $log_file
   else
     failed+=($branch)
-    echo "[$(date)]: $branch" >> $script_dir/fails.log
+    echo "[$(date)]: FAIL $branch" >> $log_file
   fi
 done
 git checkout $current_branch
