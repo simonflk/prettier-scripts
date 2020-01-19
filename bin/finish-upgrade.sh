@@ -6,6 +6,20 @@ if [ -f $project_dir/.env ]; then
   source $project_dir/.env;
 fi
 
+export PRETTIFY_REMOTE
+while getopts ":w" opt; do
+  case ${opt} in
+    w ) # write
+      PRETTIFY_REMOTE=true
+      ;;
+    \? )
+      echo "Unrecognised option -${OPTARG}" >&2
+      echo "Usage: finish-upgrade.sh [-w]" >&2
+      exit 1;
+      ;;
+  esac
+done
+
 echo -e "\n\n• committing prettier code..."
 GIT_COMMITTER_NAME=${GIT_COMMITTER_NAME:-prettier}
 GIT_COMMITTER_EMAIL=${GIT_COMMITTER_EMAIL:-prettier@ontrackretail.co.uk}
@@ -21,7 +35,7 @@ if [ "$PRETTIFY_REMOTE" == "true" ]; then
 fi
 
 echo '✨ `master` is tagged.'
-echo "Press ENTER to upgrade all PR branches with `upgrade-branches.sh`'
+echo 'Press ENTER to upgrade all PR branches with `upgrade-branches.sh`'
 read -s
 
 $script_dir/upgrade-branches.sh

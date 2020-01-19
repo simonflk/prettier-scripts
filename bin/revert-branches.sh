@@ -12,7 +12,7 @@ failed=()
 for branch in $($script_dir/get-branches.sh); do
   echo -e '\n\n• reverting `'$branch'`'
   git checkout $branch
-  if $script_dir/upgrade-branch.sh --revert; then
+  if $script_dir/upgrade-branch.sh -r; then
     reverted+=($branch)
   else
     failed+=($branch)
@@ -21,5 +21,12 @@ done
 git checkout $current_branch
 
 echo 'Summary of results:'
-for i in ${reverted[@]}; do echo "↩️  $i"; done
-for i in ${failed[@]}; do echo "⚠️  $i"; done
+if [ ${#reverted[@]} -ne 0 ]; then
+    echo -e "\nReset:"
+    for i in ${reverted[@]}; do echo "  ↩️  $i"; done
+fi
+if [ ${#failed[@]} -ne 0 ]; then
+  echo -e "\nFailed to reset:"
+  for i in ${failed[@]}; do echo "  ⚠️  $i"; done
+  exit 1
+fi

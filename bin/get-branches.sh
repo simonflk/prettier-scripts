@@ -5,6 +5,9 @@ if [ -f $project_dir/.env ]; then
   source $project_dir/.env;
 fi
 
+GITHUB_OWNER=$(basename $(dirname `git rev-parse --show-toplevel`))
+GITHUB_REPO=$(basename $(git remote get-url origin) .git)
+
 ISF='' read -r -d '' query <<-END_GQL
 query {
   repository(owner: "$GITHUB_OWNER", name: "$GITHUB_REPO") {
